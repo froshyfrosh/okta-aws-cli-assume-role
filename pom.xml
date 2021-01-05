@@ -20,7 +20,7 @@
 
     <groupId>com.okta.developer</groupId>
     <artifactId>okta-aws-cli</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.0.6.2</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -33,7 +33,7 @@
         <jsoup.version>1.11.3</jsoup.version>
         <opensaml.version>3.3.0</opensaml.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <openjfx.version>11</openjfx.version>
+        <openjfx.version>14</openjfx.version>
     </properties>
 
     <dependencies>
@@ -103,7 +103,7 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>11</version>
+            <version>14</version>
         </dependency>
 
         <!-- Test dependencies -->
@@ -121,7 +121,7 @@
         </dependency>
     </dependencies>
 
-    <distributionManagement>
+    <!-- distributionManagement>
         <repository>
             <id>packagecloud-travis</id>
             <url>packagecloud+https://packagecloud.io/oktadev/okta-aws-cli-assume-role</url>
@@ -129,6 +129,22 @@
         <snapshotRepository>
             <id>packagecloud-travis</id>
             <url>packagecloud+https://packagecloud.io/oktadev/okta-aws-cli-assume-role</url>
+        </snapshotRepository>
+    </distributionManagement -->
+    <distributionManagement>
+        <!-- Publish the versioned releases here -->
+        <repository>
+            <id>computational-biology-nexus</id>
+            <name>computational-biology-nexus</name>
+            <!-- <url>http://bioinfo.idorsia.com:8081/nexus/content/repositories/releases</url> -->
+            <url>https://nexus.idorsia.com/repository/idorsia-releases/</url>
+        </repository>
+        <!-- Publish the snapshot releases here -->
+        <snapshotRepository>
+            <id>computational-biology-nexus</id>
+            <name>computational-biology-nexus</name>
+            <!-- <url>http://bioinfo.idorsia.com:8081/nexus/content/repositories/snapshots</url> -->
+            <url>https://nexus.idorsia.com/repository/idorsia-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
