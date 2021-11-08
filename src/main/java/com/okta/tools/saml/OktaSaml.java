@@ -16,7 +16,6 @@
 package com.okta.tools.saml;
 
 import com.okta.tools.OktaAwsCliEnvironment;
-import com.okta.tools.authentication.BrowserAuthentication;
 import com.okta.tools.authentication.OktaAuthentication;
 import com.okta.tools.helpers.CookieHelper;
 import com.okta.tools.helpers.HttpHelper;
@@ -46,11 +45,15 @@ public class OktaSaml {
         OktaAuthentication authentication = new OktaAuthentication(environment);
 
         if (environment.browserAuth) {
-            try {
-                return BrowserAuthentication.login(environment);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            // PR
+            throw new RuntimeException("Browser Authentication not supported");
+            // @formatter:off
+            //            try {
+            //                return BrowserAuthentication.login(environment);
+            //            } catch (InterruptedException e) {
+            //                throw new RuntimeException(e);
+            //            }
+            // @formatter:on
         } else {
             try {
                 return getSamlResponseForAwsRefresh();

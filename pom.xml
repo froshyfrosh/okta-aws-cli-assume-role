@@ -33,7 +33,7 @@
         <jsoup.version>1.11.3</jsoup.version>
         <opensaml.version>3.3.0</opensaml.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <openjfx.version>14</openjfx.version>
+        <!-- openjfx.version>14</openjfx.version -->
     </properties>
 
     <dependencies>
@@ -100,11 +100,11 @@
             <version>${slf4j.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
+        <!-- dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
             <version>14</version>
-        </dependency>
+        </dependency -->
 
         <!-- Test dependencies -->
         <dependency>
