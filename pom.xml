@@ -27,7 +27,7 @@
         <aws-java-sdk.version>1.11.410</aws-java-sdk.version>
         <okta.version>1.2.0</okta.version>
         <json.version>20180813</json.version>
-        <log4j.version>2.15.0</log4j.version>
+        <log4j.version>2.16.0</log4j.version>
         <junit.jupiter.version>5.3.1</junit.jupiter.version>
         <ini4j.version>0.5.4</ini4j.version>
         <jsoup.version>1.11.3</jsoup.version>
