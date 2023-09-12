@@ -20,7 +20,7 @@
 
     <groupId>com.okta.developer</groupId>
     <artifactId>okta-aws-cli</artifactId>
-    <version>1.0.6.4</version>
+    <version>1.0.6.5</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -136,14 +136,12 @@
         <repository>
             <id>computational-biology-nexus</id>
             <name>computational-biology-nexus</name>
-            <!-- <url>http://bioinfo.idorsia.com:8081/nexus/content/repositories/releases</url> -->
             <url>https://nexus.idorsia.com/repository/idorsia-releases/</url>
         </repository>
         <!-- Publish the snapshot releases here -->
         <snapshotRepository>
             <id>computational-biology-nexus</id>
             <name>computational-biology-nexus</name>
-            <!-- <url>http://bioinfo.idorsia.com:8081/nexus/content/repositories/snapshots</url> -->
             <url>https://nexus.idorsia.com/repository/idorsia-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
@@ -165,6 +163,7 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -198,6 +197,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.0</version>
