@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.tools.models;
+package com.okta.tools.saml;
 
-import org.apache.http.StatusLine;
+import org.jsoup.nodes.Document;
 
-public class AuthResult {
-    public final StatusLine statusLine;
-    public final String responseContent;
+import java.io.IOException;
 
-    public AuthResult(StatusLine statusLine, String responseContent) {
-        this.statusLine = statusLine;
-        this.responseContent = responseContent;
-    }
+public interface OktaAppClient {
+    Document launchApp(String appUrl) throws IOException;
 }

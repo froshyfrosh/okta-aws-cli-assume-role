@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.tools.models;
+package com.okta.tools.authentication;
 
-import org.apache.http.StatusLine;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class AuthResult {
-    public final StatusLine statusLine;
-    public final String responseContent;
-
-    public AuthResult(StatusLine statusLine, String responseContent) {
-        this.statusLine = statusLine;
-        this.responseContent = responseContent;
-    }
+public interface OktaFactorSelector {
+    /**
+     * Handles selection of a factor from multiple choices
+     *
+     * @param primaryAuthResponse The response from Primary Authentication
+     * @return A {@link JSONObject} representing the selected factor.
+     * @throws JSONException if a network or protocol error occurs
+     */
+    JSONObject selectFactor(JSONObject primaryAuthResponse);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Okta
+ * Copyright 2019 Okta
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,48 +16,36 @@
 package com.okta.tools.saml;
 
 import com.okta.tools.OktaAwsCliEnvironment;
+// import com.okta.tools.authentication.BrowserAuthentication; // PR
 import com.okta.tools.authentication.OktaAuthentication;
-import com.okta.tools.helpers.CookieHelper;
-import com.okta.tools.helpers.HttpHelper;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.logging.Logger;
 
 public class OktaSaml {
+    private static final Logger LOGGER = Logger.getLogger(OktaSaml.class.getName());
 
     private final OktaAwsCliEnvironment environment;
-    private final CookieHelper cookieHelper;
+    private final OktaAuthentication authentication;
+    private final OktaAppClient oktaAppClient;
 
-    public OktaSaml(OktaAwsCliEnvironment environment, CookieHelper cookieHelper) {
+    public OktaSaml(OktaAwsCliEnvironment environment, OktaAuthentication oktaAuthentication, OktaAppClient oktaAppClient) {
         this.environment = environment;
-        this.cookieHelper = cookieHelper;
+        this.authentication = oktaAuthentication;
+        this.oktaAppClient = oktaAppClient;
     }
 
-    public String getSamlResponse() throws IOException {
-        OktaAuthentication authentication = new OktaAuthentication(environment);
-
+    public String getSamlResponse() throws IOException, InterruptedException {
         if (environment.browserAuth) {
             // PR
             throw new RuntimeException("Browser Authentication not supported");
-            // @formatter:off
-            //            try {
-            //                return BrowserAuthentication.login(environment);
-            //            } catch (InterruptedException e) {
-            //                throw new RuntimeException(e);
-            //            }
-            // @formatter:on
+            // return BrowserAuthentication.login(environment);
         } else {
             try {
                 return getSamlResponseForAwsRefresh();
-            } catch (PromptForReAuthenticationException | PromptForFactorException e) {
+            } catch (PromptForReAuthenticationException | PromptForFactorException | PromptForCredentialsException e) {
                 String oktaSessionToken = authentication.getOktaSessionToken();
                 return getSamlResponseForAws(oktaSessionToken);
             }
@@ -70,7 +58,7 @@ public class OktaSaml {
     }
 
     private String getSamlResponseForAwsRefresh() throws IOException {
-        Document document = launchOktaAwsApp(environment.oktaAwsAppUrl);
+        Document document = oktaAppClient.launchApp(environment.oktaAwsAppUrl);
         return getSamlResponseForAwsFromDocument(document);
     }
 
@@ -85,9 +73,10 @@ public class OktaSaml {
                 Elements errorContent = document.getElementsByClass("error-content");
                 Elements errorHeadline = errorContent.select("h1");
                 if (errorHeadline.hasText()) {
-                    throw new RuntimeException(errorHeadline.text());
+                    throw new IllegalStateException(errorHeadline.text());
                 } else {
-                    throw new RuntimeException("You do not have access to AWS through Okta. \nPlease contact your administrator.");
+                    LOGGER.fine(document::toString);
+                    throw new IllegalStateException("An unhandled error occurred. Please consult the server response above.");
                 }
             }
         }
@@ -106,6 +95,12 @@ public class OktaSaml {
         }
     }
 
+    public static final class PromptForCredentialsException extends IllegalStateException {
+        public PromptForCredentialsException(String message) {
+            super(message);
+        }
+    }
+
     // Heuristic based on undocumented behavior observed experimentally
     // This condition may be missed if Okta significantly changes the app-level re-auth page
     private boolean isPasswordAuthenticationChallenge(Document document) {
@@ -119,31 +114,6 @@ public class OktaSaml {
     }
 
     private Document launchOktaAwsAppWithSessionToken(String appUrl, String oktaSessionToken) throws IOException {
-        return launchOktaAwsApp(appUrl + "?onetimetoken=" + oktaSessionToken);
-    }
-
-    private Document launchOktaAwsApp(String appUrl) throws IOException {
-        HttpGet httpget = new HttpGet(appUrl);
-        CookieStore cookieStore = cookieHelper.loadCookies();
-
-        try (CloseableHttpClient httpClient = HttpHelper.createClient(HttpClients.custom().setDefaultCookieStore(cookieStore));
-             CloseableHttpResponse oktaAwsAppResponse = httpClient.execute(httpget)) {
-
-            if (oktaAwsAppResponse.getStatusLine().getStatusCode() >= 500) {
-                throw new RuntimeException("Server error when loading Okta AWS App: "
-                        + oktaAwsAppResponse.getStatusLine().getStatusCode());
-            } else if (oktaAwsAppResponse.getStatusLine().getStatusCode() >= 400) {
-                throw new RuntimeException("Client error when loading Okta AWS App: "
-                        + oktaAwsAppResponse.getStatusLine().getStatusCode());
-            }
-
-            cookieHelper.storeCookies(cookieStore);
-
-            return Jsoup.parse(
-                    oktaAwsAppResponse.getEntity().getContent(),
-                    StandardCharsets.UTF_8.name(),
-                    appUrl
-            );
-        }
+        return oktaAppClient.launchApp(appUrl + "?onetimetoken=" + oktaSessionToken);
     }
 }

@@ -1,12 +1,5 @@
-package com.okta.tools;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /*
- * Copyright 2017 Okta
+ * Copyright 2019 Okta
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +13,16 @@ import java.util.Map;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.okta.tools;
+
+import java.time.Instant;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class WithOkta {
-    public static void main(String[] args) throws Exception {
+    private static final Logger logger = Logger.getLogger(WithOkta.class.getName());
+
+    public static void main(final String[] args) throws Exception {
         if (LogoutHandler.handleLogout(args)) return;
         OktaAwsCliEnvironment environment = OktaAwsConfig.loadEnvironment();
         OktaAwsCliAssumeRole.RunResult runResult = OktaAwsCliAssumeRole.withEnvironment(environment).run(Instant.now());
@@ -32,29 +32,18 @@ public class WithOkta {
             awsEnvironment.put("AWS_ACCESS_KEY_ID", runResult.accessKeyId);
             awsEnvironment.put("AWS_SECRET_ACCESS_KEY", runResult.secretAccessKey);
             awsEnvironment.put("AWS_SESSION_TOKEN", runResult.sessionToken);
-            args = removeProfileArguments(args);
+            awsEnvironment.put("AWS_DEFAULT_REGION", environment.awsRegion.id());
+        }
+
+        if(args.length == 0) {
+            logger.info("No additional command line arguments provided. Hint: okta-aws <aws cli command>");
+            System.exit(0);
+            return;
         }
         awsProcessBuilder.command(args);
+        logger.fine(() -> "AWS CLI command line: " + awsProcessBuilder.command().toString());
         Process awsSubProcess = awsProcessBuilder.start();
         int exitCode = awsSubProcess.waitFor();
         System.exit(exitCode);
-    }
-
-    private static String[] removeProfileArguments(String[] args) {
-        List<String> argsList = new ArrayList<>(args.length);
-        boolean profileArg = false;
-        for (String arg : args) {
-            if ("--profile".equals(arg)) {
-                // skip the profile flag and note to skip its argument
-                profileArg = true;
-            }
-            else if (profileArg) {
-                // skip the profile argument
-                profileArg = false;
-            } else {
-                argsList.add(arg);
-            }
-        }
-        return argsList.toArray(new String[] {});
     }
 }

@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.tools.models;
+package com.okta.tools.authentication;
 
-import org.apache.http.StatusLine;
+public interface UserConsole {
 
-public class AuthResult {
-    public final StatusLine statusLine;
-    public final String responseContent;
+    String promptForUsername();
 
-    public AuthResult(StatusLine statusLine, String responseContent) {
-        this.statusLine = statusLine;
-        this.responseContent = responseContent;
-    }
+    String promptForPassword();
 }

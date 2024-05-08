@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Okta
+ * Copyright 2019 Okta
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import java.util.Map;
 public final class AwsSamlRoleUtils {
     private static final String AWS_ROLE_SAML_ATTRIBUTE = "https://aws.amazon.com/SAML/Attributes/Role";
 
+    private AwsSamlRoleUtils() {}
+
     public static Map<String, String> getRoles(String samlResponse) {
         Map<String, String> roles = new LinkedHashMap<>();
         for (String roleIdpPair : getRoleIdpPairs(samlResponse)) {
@@ -54,12 +56,22 @@ public final class AwsSamlRoleUtils {
             Assertion assertion = SamlResponseUtils.getAssertion(samlResponse);
             return AssertionUtils.getAttributeValues(assertion, AWS_ROLE_SAML_ATTRIBUTE);
         } catch (ParserConfigurationException | UnmarshallingException | SAXException | IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static String getDestination(String samlResponse) {
+        try {
+            String destination = SamlResponseUtils.getDestination(samlResponse);
+            return destination;
+        } catch (ParserConfigurationException | UnmarshallingException | SAXException | IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 
     public static Document getSigninPageDocument(String samlResponse) throws IOException {
-        HttpPost httpPost = new HttpPost("https://signin.aws.amazon.com/saml");
+        String destination = getDestination(samlResponse);
+        HttpPost httpPost = new HttpPost(destination);
         UrlEncodedFormEntity samlForm = new UrlEncodedFormEntity(Arrays.asList(
                 new BasicNameValuePair("SAMLResponse", samlResponse),
                 new BasicNameValuePair("RelayState", "")
@@ -70,7 +82,7 @@ public final class AwsSamlRoleUtils {
             return Jsoup.parse(
                     samlSigninResponse.getEntity().getContent(),
                     StandardCharsets.UTF_8.name(),
-                    "https://signin.aws.amazon.com/saml"
+                    destination
             );
         }
     }

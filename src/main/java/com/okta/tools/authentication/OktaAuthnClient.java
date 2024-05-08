@@ -13,14 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.tools.helpers;
+package com.okta.tools.authentication;
 
-public interface MenuHelper {
+import com.okta.tools.models.AuthResult;
+
+import java.io.IOException;
+
+public interface OktaAuthnClient {
     /**
-     * Prompt the user to select an option from a menu of options
+     * Perform primary authentication against Okta
      *
-     * @param max The maximum number of options
-     * @return The selected option
+     * @param username The username of the user
+     * @param password The password of the user
+     * @param oktaOrg  The org to perform auth against
+     * @return The authentication result
+     * @throws IOException If an error occurs during the api call or during the processing of the result.
      */
-    int promptForMenuSelection(int max);
+    AuthResult primaryAuthentication(String username, String password, String oktaOrg) throws IOException;
 }

@@ -13,16 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.okta.tools.models;
+package com.okta.tools.authentication;
 
-import org.apache.http.StatusLine;
+import java.util.Scanner;
 
-public class AuthResult {
-    public final StatusLine statusLine;
-    public final String responseContent;
+public class UserConsoleImpl implements UserConsole {
 
-    public AuthResult(StatusLine statusLine, String responseContent) {
-        this.statusLine = statusLine;
-        this.responseContent = responseContent;
+    @Override
+    public String promptForUsername() {
+        System.err.print("Username: ");
+        return new Scanner(System.in).next();
+    }
+
+    @Override
+    public String promptForPassword() {
+        if (System.console() == null) { // hack to be able to debug in an IDE
+            System.err.print("Password: ");
+            return new Scanner(System.in).nextLine();
+        } else {
+            return new String(System.console().readPassword("Password: "));
+        }
     }
 }
